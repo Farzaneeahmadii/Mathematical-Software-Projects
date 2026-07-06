@@ -1,0 +1,51 @@
+%%% پروژه کوچک ریاضی با قالب پایان‌نامه دانشگاه صنعتی امیرکبیر
+%%% برای اجرا: XeLaTeX را دو یا سه بار روی همین فایل اجرا کنید.
+%%% !TEX TS-program = XeLaTeX
+\documentclass[oneside,bsc,12pt]{AUTthesis}
+
+\input{commands}
+
+\begin{document}
+\baselineskip=.75cm
+\linespread{1.65}
+
+% صفحه عنوان، چکیده فارسی و صفحه بسم الله
+\input{fa_title}
+
+% فهرست‌ها و نمادها
+\pagenumbering{alph}
+\input{TOC-TOF-LOT}
+\input{list-of-symbols}
+
+% فصل‌ها
+\pagenumbering{arabic}
+\pagestyle{style1}
+\include{chapter1}
+\include{chapter2}
+
+% منابع و مراجع
+\chapterfont{\vspace*{-2em}\centering\LARGE}%
+\begin{thebibliography}{9}
+\bibitem{burden}
+\begin{latin}
+Burden, R. L., Faires, J. D., and Burden, A. M., \textit{Numerical Analysis}, Cengage Learning, 10th edition, 2016.
+\end{latin}
+
+\bibitem{atkinson}
+\begin{latin}
+Atkinson, K. E., \textit{An Introduction to Numerical Analysis}, John Wiley \& Sons, 2nd edition, 1989.
+\end{latin}
+
+\bibitem{nocedal}
+\begin{latin}
+Nocedal, J. and Wright, S. J., \textit{Numerical Optimization}, Springer, 2nd edition, 2006.
+\end{latin}
+
+\bibitem{rudin}
+\begin{latin}
+Rudin, W., \textit{Principles of Mathematical Analysis}, McGraw-Hill, 3rd edition, 1976.
+\end{latin}
+\end{thebibliography}
+
+% صفحه‌های انگلیسی پایانی حذف شده‌اند.
+\end{document}

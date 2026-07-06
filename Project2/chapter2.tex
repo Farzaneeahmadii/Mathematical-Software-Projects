@@ -1,0 +1,182 @@
+\chapter{روش نیوتن، الگوریتم و ارزیابی عددی}
+
+\section{استخراج فرمول نیوتن}
+بر اساس رابطه \cref{eq:h-formula}، اگر $f'(x_k)\neq 0$ باشد، تکرار نیوتن به صورت زیر تعریف می‌شود:
+\begin{equation}
+ x_{k+1}=x_k-\frac{f(x_k)}{f'(x_k)}.
+ \label{eq:newton-main}
+\end{equation}
+از دید هندسی، ابتدا در نقطه $(x_k,f(x_k))$ خط مماس رسم می‌شود. سپس محل برخورد این خط با محور افقی به عنوان $x_{k+1}$ انتخاب می‌شود. معادله خط مماس چنین است:
+\begin{equation}
+ y=f(x_k)+f'(x_k)(x-x_k).
+ \label{eq:tangent-line}
+\end{equation}
+با قرار دادن $y=0$ در \cref{eq:tangent-line} دوباره همان فرمول \cref{eq:newton-main} به دست می‌آید.
+
+\section{شبه‌کد الگوریتم}
+برای اجرای عددی روش نیوتن، باید مقدار اولیه، تابع، مشتق تابع، حد تحمل و حداکثر تعداد تکرار مشخص شود. شبه‌کد \cref{alg:newton} مراحل کلی الگوریتم را نشان می‌دهد.
+
+\begin{algorithm}[H]
+\caption{شبه‌کد روش نیوتن برای حل $f(x)=0$}
+\label{alg:newton}
+\begin{latin}
+\begin{tabular}{ll}
+\textbf{Input:} & function $f$, derivative $f'$, initial point $x_0$, tolerance $\varepsilon$, maximum iteration $N$ \\
+\textbf{Output:} & approximate root $x_{k+1}$ \\
+\hline
+1. & for $k=0,1,\ldots,N-1$ do \\
+2. & \quad if $f'(x_k)=0$, stop and report failure \\
+3. & \quad $x_{k+1}=x_k-\dfrac{f(x_k)}{f'(x_k)}$ \\
+4. & \quad if $|x_{k+1}-x_k|<\varepsilon$ or $|f(x_{k+1})|<\varepsilon$, return $x_{k+1}$ \\
+5. & \quad set $x_k\leftarrow x_{k+1}$ \\
+6. & end for \\
+7. & report that the method did not converge within $N$ iterations.
+\end{tabular}
+\end{latin}
+\end{algorithm}
+
+\section{فلوچارت اجرای روش}
+فلوچارت \cref{fig:flowchart} مسیر تصمیم‌گیری الگوریتم را نشان می‌دهد. این شکل به ویژه برای پیاده‌سازی برنامه مفید است، چون هم حالت موفق و هم حالت شکست را جدا می‌کند.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.72\textwidth}{!}{%
+\begin{tikzpicture}[
+node distance=1.05cm,
+font=\small,
+startstop/.style={ellipse, draw, minimum width=2.5cm, minimum height=0.65cm, align=center},
+process/.style={rectangle, draw, rounded corners, minimum width=3.6cm, minimum height=0.65cm, align=center},
+decision/.style={diamond, draw, aspect=2.15, inner sep=1pt, minimum width=3.5cm, align=center},
+arrow/.style={-{Stealth[length=2.1mm]}, thick}
+]
+\node[startstop] (start) {شروع};
+\node[process, below=of start] (input) {دریافت $f$، $f'$، $x_0$ و $\varepsilon$};
+\node[decision, below=of input] (deriv) {آیا $f'(x_k)=0$؟};
+\node[process, below=of deriv] (update) {محاسبه $x_{k+1}=x_k-\frac{f(x_k)}{f'(x_k)}$};
+\node[decision, below=of update] (stop) {آیا شرط توقف برقرار است؟};
+\node[startstop, below=of stop] (success) {پایان: ریشه تقریبی};
+\node[startstop, right=2.55cm of deriv] (fail) {شکست};
+\node[process, left=2.55cm of stop] (next) {$k\leftarrow k+1$};
+\draw[arrow] (start) -- (input);
+\draw[arrow] (input) -- (deriv);
+\draw[arrow] (deriv) -- node[right]{خیر} (update);
+\draw[arrow] (deriv) -- node[above]{بله} (fail);
+\draw[arrow] (update) -- (stop);
+\draw[arrow] (stop) -- node[right]{بله} (success);
+\draw[arrow] (stop) -- node[above]{خیر} (next);
+\draw[arrow] (next) |- (deriv);
+\end{tikzpicture}%
+}
+\caption{فلوچارت ساده اجرای روش نیوتن}
+\label{fig:flowchart}
+\end{figure}
+
+\section{قضیه همگرایی درجه دوم}
+در این بخش نشان می‌دهیم که اگر نقطه شروع به ریشه ساده نزدیک باشد، خطای روش نیوتن تقریباً با مربع خطای قبلی متناسب است. این همان دلیل سرعت زیاد روش است.
+
+\begin{theorem}[همگرایی درجه دوم روش نیوتن]
+\label{thm:quadratic}
+فرض کنید $f$ در همسایگی ریشه ساده $\alpha$ دوبار پیوسته مشتق‌پذیر باشد، $f(\alpha)=0$ و $f'(\alpha)\neq 0$. اگر $x_0$ به اندازه کافی به $\alpha$ نزدیک باشد، آنگاه دنباله حاصل از \cref{eq:newton-main} به $\alpha$ همگرا می‌شود و برای خطا داریم
+\begin{equation}
+ |e_{k+1}|\leq C|e_k|^2,
+ \label{eq:quadratic-bound}
+\end{equation}
+که در آن $C$ یک ثابت مثبت است.
+\end{theorem}
+
+\begin{proof}
+با توجه به $e_k=x_k-\alpha$، تکرار نیوتن را از ریشه دقیق کم می‌کنیم. با استفاده از بسط تیلور حول $\alpha$ داریم
+\begin{align}
+ e_{k+1}
+ &=x_{k+1}-\alpha \notag\\
+ &=x_k-\frac{f(x_k)}{f'(x_k)}-\alpha \notag\\
+ &=e_k-\frac{f(\alpha)+f'(\alpha)e_k+\frac{1}{2}f''(\xi_k)e_k^2}{f'(x_k)} \notag\\
+ &=e_k-\frac{f'(\alpha)e_k}{f'(x_k)}-
+ \frac{f''(\xi_k)}{2f'(x_k)}e_k^2 .
+ \label{eq:error-expansion-long}
+\end{align}
+از طرفی چون $f'$ پیوسته است و $f'(\alpha)\neq 0$، برای $x_k$های نزدیک به $\alpha$، مقدار $f'(x_k)$ از صفر دور می‌ماند. بنابراین می‌توان ثابت مثبتی مانند $C$ پیدا کرد که جمله‌های سمت راست \cref{eq:error-expansion-long} را کنترل کند و رابطه \cref{eq:quadratic-bound} نتیجه شود. پس مرتبه همگرایی روش نیوتن در نزدیکی ریشه ساده برابر دو است.
+\end{proof}
+
+فرمول چندخطی \cref{eq:error-expansion-long} نمونه‌ای از یک رابطه طولانی است که مطابق اصول نگارش ریاضی، در چند خط شکسته و شماره‌گذاری شده است.
+
+\section{مثال عددی و جدول تکرارها}
+تابع زیر را در نظر بگیرید:
+\begin{equation}
+ f(x)=x^3-x-2,
+ \qquad
+ f'(x)=3x^2-1.
+ \label{eq:example-function}
+\end{equation}
+برای مقدار اولیه $x_0=1.5$، روش نیوتن طبق \cref{eq:newton-main} به ریشه حقیقی تابع نزدیک می‌شود. مقدار دقیق ریشه تقریباً برابر است با
+\begin{equation}
+ \alpha\approx 1.5213797068.
+ \label{eq:alpha-value}
+\end{equation}
+نتیجه چند تکرار اول در \cref{tab:newton-table} آمده است.
+
+\begin{table}[H]
+\centering
+\caption{جدول تکرارهای روش نیوتن برای تابع $f(x)=x^3-x-2$}
+\label{tab:newton-table}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$k$ & $x_k$ & $f(x_k)$ & $x_{k+1}$ & $|x_k-\alpha|$ \\
+\hline
+$0$ & $1.500000$ & $-0.125000$ & $1.521739$ & $2.1379\times10^{-2}$ \\
+\hline
+$1$ & $1.521739$ & $2.1369\times10^{-3}$ & $1.521380$ & $3.5942\times10^{-4}$ \\
+\hline
+$2$ & $1.521380$ & $5.8939\times10^{-7}$ & $1.521380$ & $9.9160\times10^{-8}$ \\
+\hline
+$3$ & $1.521380$ & $4.5297\times10^{-14}$ & $1.521380$ & $7.5495\times10^{-15}$ \\
+\hline
+$4$ & $1.521380$ & $0$ & $1.521380$ & $0$ \\
+\hline
+\end{tabular}
+\end{table}
+
+همان‌طور که در \cref{tab:newton-table} دیده می‌شود، خطا پس از چند گام به سرعت کوچک می‌شود. این رفتار با نتیجه نظری \cref{thm:quadratic} سازگار است.
+
+\section{شکل‌های کمکی و تفسیر هندسی}
+در \cref{fig:subfigures} دو تصویر کمکی آورده شده است. تصویر سمت راست ایده هندسی خط مماس را نشان می‌دهد و تصویر سمت چپ کاهش سریع خطا را به صورت شماتیک نمایش می‌دهد.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.46\textwidth}
+\centering
+\begin{tikzpicture}[scale=1.0]
+\draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};
+\draw[->] (0,-0.2) -- (0,3.2) node[above] {$|e_k|$};
+\draw (0.5,2.8) node[circle,fill,inner sep=1.5pt]{};
+\draw (1.4,1.2) node[circle,fill,inner sep=1.5pt]{};
+\draw (2.3,0.35) node[circle,fill,inner sep=1.5pt]{};
+\draw (3.2,0.08) node[circle,fill,inner sep=1.5pt]{};
+\draw[dashed] (0.5,2.8) -- (1.4,1.2) -- (2.3,0.35) -- (3.2,0.08);
+\node at (2.3,2.7) {کاهش خطا};
+\end{tikzpicture}
+\caption{رفتار شماتیک خطا}
+\label{fig:error-sub}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.46\textwidth}
+\centering
+\begin{tikzpicture}[scale=1.0]
+\draw[->] (-0.2,0) -- (4.3,0) node[right] {$x$};
+\draw[->] (0,-1.1) -- (0,2.4) node[above] {$y$};
+\draw[domain=0.7:3.4,smooth,variable=\x] plot ({\x},{0.45*((\x-2.35)^3+0.6*(\x-2.35))});
+\draw[dashed] (2.0,-0.35) -- (2.0,0.35);
+\draw (2.0,0.35) node[circle,fill,inner sep=1.4pt]{} node[above right] {$x_k$};
+\draw (2.0,0.35) -- (2.55,0);
+\draw (2.55,0) node[circle,fill,inner sep=1.4pt]{} node[below] {$x_{k+1}$};
+\node at (2.8,1.55) {مماس};
+\end{tikzpicture}
+\caption{تقاطع مماس با محور افقی}
+\label{fig:tangent-sub}
+\end{subfigure}
+\caption{دو زیرشکل برای توضیح هندسی و عددی روش نیوتن}
+\label{fig:subfigures}
+\end{figure}
+
+\section{جمع‌بندی}
+روش نیوتن نمونه‌ای روشن از پیوند میان تحلیل ریاضی و الگوریتم محاسباتی است. از یک طرف، فرمول آن از بسط تیلور و خط مماس به دست می‌آید؛ از طرف دیگر، اجرای آن فقط به یک رابطه تکراری ساده نیاز دارد. بر اساس \cref{thm:quadratic}، اگر نقطه شروع مناسب انتخاب شود و ریشه ساده باشد، همگرایی روش درجه دوم خواهد بود. البته باید به شرط $f'(x_k)\neq 0$ و انتخاب مقدار اولیه نیز توجه کرد؛ زیرا انتخاب نامناسب می‌تواند باعث واگرایی یا توقف الگوریتم شود \cite{nocedal,rudin}.
